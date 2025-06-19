@@ -1,0 +1,15 @@
+# MCreator / Minecraft mod common ignore rules
+.gradle/
+build/
+out/
+run/
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+# OS stuff
+*.swp

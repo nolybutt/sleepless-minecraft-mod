@@ -1,0 +1,54 @@
+{
+  "mod_elements": [
+    {
+      "name": "Sleepless",
+      "type": "animatedentity",
+      "compiles": true,
+      "locked_code": false,
+      "registry_name": "sleepless",
+      "metadata": {
+        "files": [
+          "src/main/java/net/mcreator/sleepless/entity/SleeplessEntity.java",
+          "src/main/java/net/mcreator/sleepless/entity/layer/SleeplessLayer.java",
+          "src/main/resources/data/sleepless/forge/biome_modifier/sleepless_biome_modifier.json",
+          "src/main/java/net/mcreator/sleepless/client/renderer/SleeplessRenderer.java",
+          "src/main/java/net/mcreator/sleepless/entity/model/SleeplessModel.java",
+          "src/main/resources/assets/sleepless/models/item/sleepless_spawn_egg.json"
+        ]
+      }
+    }
+  ],
+  "variable_elements": [],
+  "sound_elements": [],
+  "tag_elements": {},
+  "tab_element_order": {},
+  "language_map": {
+    "en_us": {
+      "entity.sleepless.sleepless": "Sleepless",
+      "item.sleepless.sleepless_spawn_egg": "Sleepless Spawn Egg"
+    }
+  },
+  "foldersRoot": {
+    "name": "~",
+    "children": []
+  },
+  "workspaceSettings": {
+    "modid": "sleepless",
+    "modName": "The Sleepless",
+    "version": "1.0.0",
+    "author": "nolybutt",
+    "websiteURL": "https://mcreator.net",
+    "license": "Not specified",
+    "serverSideOnly": false,
+    "requiredMods": [],
+    "dependencies": [],
+    "dependants": [],
+    "mcreatorDependencies": [
+      "geckolib"
+    ],
+    "currentGenerator": "forge-1.20.1",
+    "credits": "Created using mod maker MCreator - https://mcreator.net/about",
+    "modElementsPackage": "net.mcreator.sleepless"
+  },
+  "mcreatorVersion": 202400452410
+}
