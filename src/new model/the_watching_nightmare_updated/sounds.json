@@ -1,0 +1,218 @@
+{
+  "better_start_running": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:better_start_running",
+        "stream": false
+      }
+    ]
+  },
+  "chase_music": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:chase_music.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "chase_scream": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:chase_scream.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "death": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:death.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "digging": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:digging.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "disappear": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:disappear.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "distant": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:distant_1.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:distant_2.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:distant_3.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:distant_4.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:distant_5.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "chase_roar": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:chase_1.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:chase_2.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "flee": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:flee_1.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "distant_voice": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:i_see_you.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:man_screaming.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:laugh.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "jumpscare": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:jumpscare.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "roar": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:roar.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "scream": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:scream_2.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:scream.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:scream_3.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:scream_4.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:scream_5.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "stalking_music": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:stalking_music.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "chase_step": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:step_1.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:step_2.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "stinger": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:stinger_0.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:stinger_1.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:stinger_2.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "watching_theme": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:watching_theme.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "whisper": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:whisper.ogg",
+        "stream": false
+      }
+    ]
+  },
+  "bone_crunch": {
+    "sounds": [
+      {
+        "name": "the_watching_nightmare_updated:bone-break.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:bone-crack.ogg",
+        "stream": false
+      },
+      {
+        "name": "the_watching_nightmare_updated:bone-crunch-fast.ogg",
+        "stream": false
+      }
+    ]
+  }
+}
