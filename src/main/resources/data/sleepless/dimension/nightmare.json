@@ -1,5 +1,5 @@
 {
-  "type": "sleepless:nightmare_dimension_type",
+  "type": "sleepless:nightmare",
   "generator": {
     "type": "minecraft:flat",
     "settings": {
