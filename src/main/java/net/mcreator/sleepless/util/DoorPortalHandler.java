@@ -44,7 +44,7 @@ public class DoorPortalHandler {
         // Only trigger when opening a closed door
         if (state.getValue(DoorBlock.OPEN))
             return;
-        List<SleeplessEntity> nearby = event.getLevel().getEntitiesOfClass(SleeplessEntity.class, player.getBoundingBox().inflate(10));
+        List<SleeplessEntity> nearby = event.getLevel().getEntitiesOfClass(SleeplessEntity.class, player.getBoundingBox().inflate(20));
         if (nearby.isEmpty())
             return;
         CompoundTag tag = player.getPersistentData();
