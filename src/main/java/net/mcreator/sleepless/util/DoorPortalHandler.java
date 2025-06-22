@@ -69,7 +69,7 @@ public class DoorPortalHandler {
             tag.remove(KEY_X);
             tag.remove(KEY_Y);
             tag.remove(KEY_Z);
-            if (player.getRandom().nextFloat() < 0.2f) {
+            if (player.getRandom().nextFloat() < 0.05f) {
                 if (player instanceof ServerPlayer sp) {
                     ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(SleeplessMod.MODID, "nightmare"));
                     ServerLevel target = sp.server.getLevel(key);
