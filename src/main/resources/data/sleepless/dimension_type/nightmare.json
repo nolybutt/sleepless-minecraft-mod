@@ -5,6 +5,8 @@
   "bed_works": false,
   "respawn_anchor_works": false,
   "has_skylight": false,
+  "has_ceiling": true,
+  "has_weather": false,
   "has_raids": false,
   "logical_height": 256,
   "coordinate_scale": 1.0,
