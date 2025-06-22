@@ -54,10 +54,11 @@ public class SleeplessEntity extends Monster implements GeoEntity {
 	public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(SleeplessEntity.class, EntityDataSerializers.STRING);
 	public static final EntityDataAccessor<String> TEXTURE = SynchedEntityData.defineId(SleeplessEntity.class, EntityDataSerializers.STRING);
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-	private boolean swinging;
-	private boolean lastloop;
-	private long lastSwing;
-	public String animationprocedure = "empty";
+        private boolean swinging;
+        private boolean lastloop;
+        private long lastSwing;
+        public String animationprocedure = "empty";
+        private int lookedAtTicks;
 
 	public SleeplessEntity(PlayMessages.SpawnEntity packet, Level world) {
 		this(SleeplessModEntities.SLEEPLESS.get(), world);
@@ -147,11 +148,20 @@ public class SleeplessEntity extends Monster implements GeoEntity {
                 super.baseTick();
                 this.refreshDimensions();
                 if (!level().isClientSide()) {
+                        boolean someoneLooking = false;
                         for (Player player : level().players()) {
                                 if (player.distanceTo(this) < 16 && isPlayerLooking(player)) {
-                                        this.remove(RemovalReason.DISCARDED);
+                                        someoneLooking = true;
                                         break;
                                 }
+                        }
+                        if (someoneLooking) {
+                                lookedAtTicks++;
+                                if (lookedAtTicks > 40) {
+                                        this.remove(RemovalReason.DISCARDED);
+                                }
+                        } else {
+                                lookedAtTicks = 0;
                         }
                 }
        }
