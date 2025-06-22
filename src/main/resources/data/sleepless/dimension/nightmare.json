@@ -8,7 +8,7 @@
       "features": false,
       "layers": [
         {"block": "minecraft:bedrock", "height": 1}
-      ],
+      ]
 
     }
   }
