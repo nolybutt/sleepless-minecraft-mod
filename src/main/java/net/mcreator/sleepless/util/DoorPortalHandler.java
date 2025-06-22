@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -70,7 +71,7 @@ public class DoorPortalHandler {
             tag.remove(KEY_Z);
             if (player.getRandom().nextFloat() < 0.2f) {
                 if (player instanceof ServerPlayer sp) {
-                    ResourceKey<Level> key = ResourceKey.create(Level.RESOURCE_KEY, new ResourceLocation(SleeplessMod.MODID, "nightmare"));
+                    ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(SleeplessMod.MODID, "nightmare"));
                     ServerLevel target = sp.server.getLevel(key);
                     if (target != null)
                         sp.changeDimension(target);
