@@ -14,13 +14,13 @@ import java.util.EnumSet;
 public class StalkPlayerGoal extends Goal {
     private final SleeplessEntity mob;
     private final double speed;
-    private final double stopDistance;
+    private final double minDistance = 12.0;
+    private final double maxDistance = 16.0;
     private Player target;
 
-    public StalkPlayerGoal(SleeplessEntity mob, double speed, double stopDistance) {
+    public StalkPlayerGoal(SleeplessEntity mob, double speed) {
         this.mob = mob;
         this.speed = speed;
-        this.stopDistance = stopDistance;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
@@ -36,9 +36,7 @@ public class StalkPlayerGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        return this.target != null && this.target.isAlive()
-                && this.mob.distanceToSqr(this.target) > (stopDistance * stopDistance)
-                && !isPlayerLooking(this.target);
+        return this.target != null && this.target.isAlive() && !isPlayerLooking(this.target);
     }
 
     @Override
@@ -51,7 +49,16 @@ public class StalkPlayerGoal extends Goal {
     public void tick() {
         if (this.target == null)
             return;
-        this.mob.getNavigation().moveTo(this.target, speed);
+        double dist = this.mob.distanceTo(this.target);
+        if (dist > maxDistance) {
+            this.mob.getNavigation().moveTo(this.target, speed);
+        } else if (dist < minDistance) {
+            Vec3 dir = this.mob.position().subtract(this.target.position()).normalize();
+            Vec3 dest = this.mob.position().add(dir.scale(minDistance - dist + 1));
+            this.mob.getNavigation().moveTo(dest.x, dest.y, dest.z, speed);
+        } else {
+            this.mob.getNavigation().stop();
+        }
         this.mob.getLookControl().setLookAt(this.target, 30.0F, 30.0F);
     }
 
