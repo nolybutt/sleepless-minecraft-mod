@@ -1,15 +1,7 @@
 {
   "type": "sleepless:nightmare",
   "generator": {
-    "type": "minecraft:flat",
-    "settings": {
-      "biome": "minecraft:the_void",
-      "lakes": false,
-      "features": false,
-      "layers": [
-        {"block": "minecraft:bedrock", "height": 1}
-      ]
-
-    }
+    "type": "minecraft:noise",
+    "settings": "minecraft:overworld"
   }
 }
