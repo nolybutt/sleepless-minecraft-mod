@@ -8,8 +8,7 @@
       "features": false,
       "layers": [
         {"block": "minecraft:bedrock", "height": 1}
-      ],
-      "structure_overrides": []
+      ]
     }
   }
 }
