@@ -24,6 +24,8 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Entity.RemovalReason;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -45,6 +47,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.nbt.CompoundTag;
 
 import net.mcreator.sleepless.init.SleeplessModEntities;
+import net.mcreator.sleepless.entity.StalkPlayerGoal;
 
 public class SleeplessEntity extends Monster implements GeoEntity {
 	public static final EntityDataAccessor<Boolean> SHOOT = SynchedEntityData.defineId(SleeplessEntity.class, EntityDataSerializers.BOOLEAN);
@@ -92,18 +95,19 @@ public class SleeplessEntity extends Monster implements GeoEntity {
 	@Override
 	protected void registerGoals() {
 		super.registerGoals();
-		this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.2, false) {
-			@Override
-			protected double getAttackReachSqr(LivingEntity entity) {
-				return this.mob.getBbWidth() * this.mob.getBbWidth() + entity.getBbWidth();
-			}
-		});
-               this.goalSelector.addGoal(2, new RandomStrollGoal(this, 1));
+               this.goalSelector.addGoal(1, new StalkPlayerGoal(this, 1.0, 2.0));
+               this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2, false) {
+                       @Override
+                       protected double getAttackReachSqr(LivingEntity entity) {
+                               return this.mob.getBbWidth() * this.mob.getBbWidth() + entity.getBbWidth();
+                       }
+               });
+               this.goalSelector.addGoal(3, new RandomStrollGoal(this, 1));
                this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
                this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
                this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
                this.goalSelector.addGoal(5, new FloatGoal(this));
-	}
+       }
 
 	@Override
 	public MobType getMobType() {
@@ -138,11 +142,25 @@ public class SleeplessEntity extends Monster implements GeoEntity {
 			this.setTexture(compound.getString("Texture"));
 	}
 
-	@Override
-	public void baseTick() {
-		super.baseTick();
-		this.refreshDimensions();
-	}
+       @Override
+       public void baseTick() {
+                super.baseTick();
+                this.refreshDimensions();
+                if (!level().isClientSide()) {
+                        for (Player player : level().players()) {
+                                if (player.distanceTo(this) < 16 && isPlayerLooking(player)) {
+                                        this.remove(RemovalReason.DISCARDED);
+                                        break;
+                                }
+                        }
+                }
+       }
+
+       private boolean isPlayerLooking(Player player) {
+               Vec3 look = player.getLookAngle().normalize();
+               Vec3 diff = position().subtract(player.getEyePosition()).normalize();
+               return look.dot(diff) > 0.8;
+       }
 
 	@Override
 	public EntityDimensions getDimensions(Pose p_33597_) {
