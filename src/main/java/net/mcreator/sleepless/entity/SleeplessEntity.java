@@ -117,10 +117,15 @@ public class SleeplessEntity extends Monster implements GeoEntity {
 		return MobType.UNDEFINED;
 	}
 
-	@Override
-	public boolean removeWhenFarAway(double distanceToClosestPlayer) {
-		return false;
-	}
+        @Override
+        public boolean removeWhenFarAway(double distanceToClosestPlayer) {
+                return false;
+        }
+
+       @Override
+       public void checkDespawn() {
+               // Prevent natural despawn logic
+       }
 
 	@Override
 	public SoundEvent getHurtSound(DamageSource ds) {
