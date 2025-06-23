@@ -54,10 +54,13 @@ public class SleeplessEntity extends Monster implements GeoEntity {
 	public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(SleeplessEntity.class, EntityDataSerializers.STRING);
 	public static final EntityDataAccessor<String> TEXTURE = SynchedEntityData.defineId(SleeplessEntity.class, EntityDataSerializers.STRING);
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-	private boolean swinging;
-	private boolean lastloop;
-	private long lastSwing;
-	public String animationprocedure = "empty";
+        private boolean swinging;
+        private boolean lastloop;
+        private long lastSwing;
+        public String animationprocedure = "empty";
+        private int lookedAtTicks;
+        private boolean waitingForClose;
+        private int invisibleTicks;
 
 	public SleeplessEntity(PlayMessages.SpawnEntity packet, Level world) {
 		this(SleeplessModEntities.SLEEPLESS.get(), world);
@@ -95,7 +98,7 @@ public class SleeplessEntity extends Monster implements GeoEntity {
 	@Override
 	protected void registerGoals() {
 		super.registerGoals();
-               this.goalSelector.addGoal(1, new StalkPlayerGoal(this, 1.0, 2.0));
+               this.goalSelector.addGoal(1, new StalkPlayerGoal(this, 1.0));
                this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2, false) {
                        @Override
                        protected double getAttackReachSqr(LivingEntity entity) {
@@ -146,14 +149,42 @@ public class SleeplessEntity extends Monster implements GeoEntity {
        public void baseTick() {
                 super.baseTick();
                 this.refreshDimensions();
-                if (!level().isClientSide()) {
+               if (!level().isClientSide()) {
+                        if (invisibleTicks > 0) {
+                                invisibleTicks--;
+                                if (invisibleTicks == 0)
+                                        this.setInvisible(false);
+                        }
+                        Player observer = null;
                         for (Player player : level().players()) {
                                 if (player.distanceTo(this) < 16 && isPlayerLooking(player)) {
-                                        this.remove(RemovalReason.DISCARDED);
+                                        observer = player;
                                         break;
                                 }
                         }
+                        if (waitingForClose && observer != null && observer.distanceTo(this) <= 6) {
+                                vanish();
+                                waitingForClose = false;
+                        } else if (observer != null) {
+                                lookedAtTicks++;
+                                if (lookedAtTicks > 10) {
+                                        if (this.getRandom().nextBoolean()) {
+                                                vanish();
+                                        } else {
+                                                waitingForClose = true;
+                                        }
+                                        lookedAtTicks = 0;
+                                }
+                        } else {
+                                lookedAtTicks = 0;
+                                waitingForClose = false;
+                        }
                 }
+       }
+
+       private void vanish() {
+               this.setInvisible(true);
+               invisibleTicks = 200;
        }
 
        private boolean isPlayerLooking(Player player) {

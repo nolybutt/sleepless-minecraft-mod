@@ -44,7 +44,7 @@ public class DoorPortalHandler {
         // Only trigger when opening a closed door
         if (state.getValue(DoorBlock.OPEN))
             return;
-        List<SleeplessEntity> nearby = event.getLevel().getEntitiesOfClass(SleeplessEntity.class, player.getBoundingBox().inflate(10));
+        List<SleeplessEntity> nearby = event.getLevel().getEntitiesOfClass(SleeplessEntity.class, player.getBoundingBox().inflate(20));
         if (nearby.isEmpty())
             return;
         CompoundTag tag = player.getPersistentData();
@@ -69,7 +69,7 @@ public class DoorPortalHandler {
             tag.remove(KEY_X);
             tag.remove(KEY_Y);
             tag.remove(KEY_Z);
-            if (player.getRandom().nextFloat() < 0.2f) {
+            if (player.getRandom().nextFloat() < 0.05f) {
                 if (player instanceof ServerPlayer sp) {
                     ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(SleeplessMod.MODID, "nightmare"));
                     ServerLevel target = sp.server.getLevel(key);
