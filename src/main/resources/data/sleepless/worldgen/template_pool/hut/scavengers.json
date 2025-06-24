@@ -1,0 +1,42 @@
+{
+	"fallback": "minecraft:empty",
+	"elements": [
+	  {
+		"weight": 5,
+		"element": {
+		  "element_type": "minecraft:single_pool_element",
+		  "projection": "rigid",
+		  "location": "sleepless:hut/scavengers/enchanter_specialist",
+		  "processors": "minecraft:empty"
+		}
+	  },
+      {
+		"weight": 5,
+		"element": {
+		  "element_type": "minecraft:single_pool_element",
+		  "projection": "rigid",
+		  "location": "sleepless:hut/scavengers/herbalist_specialist",
+		  "processors": "minecraft:empty"
+		}
+	  },
+      {
+		"weight": 5,
+		"element": {
+		  "element_type": "minecraft:single_pool_element",
+		  "projection": "rigid",
+		  "location": "sleepless:hut/scavengers/shaman_specialist",
+		  "processors": "minecraft:empty"
+		}
+	  },
+      {
+		"weight": 5,
+		"element": {
+		  "element_type": "minecraft:single_pool_element",
+		  "projection": "rigid",
+		  "location": "sleepless:hut/scavengers/smith_specialist",
+		  "processors": "minecraft:empty"
+		}
+	  }
+	]
+  }
+  

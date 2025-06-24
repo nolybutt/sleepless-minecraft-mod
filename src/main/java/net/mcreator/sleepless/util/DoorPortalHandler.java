@@ -32,6 +32,17 @@ public class DoorPortalHandler {
     private static final String KEY_Y = "sleepless_portal_y";
     private static final String KEY_Z = "sleepless_portal_z";
 
+    private static final String RETURN_X = "sleepless_return_x";
+    private static final String RETURN_Y = "sleepless_return_y";
+    private static final String RETURN_Z = "sleepless_return_z";
+    private static final String RETURN_TIMER = "sleepless_return_timer";
+
+    private static final int RETURN_TICKS = 20 * 60 * 3; // 3 minutes
+    // Spawn position inside the Sleepless dimension
+    private static final double DIM_SPAWN_X = -6.188;
+    private static final double DIM_SPAWN_Y = 80.0;
+    private static final double DIM_SPAWN_Z = 2.778;
+
     @SubscribeEvent
     public static void onDoorOpened(PlayerInteractEvent.RightClickBlock event) {
         if (event.getLevel().isClientSide())
@@ -61,8 +72,30 @@ public class DoorPortalHandler {
         if (player.level().isClientSide())
             return;
         CompoundTag tag = player.getPersistentData();
+
+        // Handle return timer if active
+        if (tag.contains(RETURN_TIMER)) {
+            int time = tag.getInt(RETURN_TIMER) - 1;
+            if (time <= 0) {
+                if (player instanceof ServerPlayer sp) {
+                    ServerLevel overworld = sp.server.getLevel(Level.OVERWORLD);
+                    if (overworld != null) {
+                        BlockPos door = new BlockPos(tag.getInt(RETURN_X), tag.getInt(RETURN_Y), tag.getInt(RETURN_Z));
+                        sp.teleportTo(overworld, door.getX() + 0.5, door.getY(), door.getZ() + 0.5, sp.getYRot(), sp.getXRot());
+                    }
+                }
+                tag.remove(RETURN_TIMER);
+                tag.remove(RETURN_X);
+                tag.remove(RETURN_Y);
+                tag.remove(RETURN_Z);
+            } else {
+                tag.putInt(RETURN_TIMER, time);
+            }
+        }
+
         if (!tag.contains(KEY_X))
             return;
+
         BlockPos doorPos = new BlockPos(tag.getInt(KEY_X), tag.getInt(KEY_Y), tag.getInt(KEY_Z));
         AABB box = new AABB(doorPos).inflate(0.25);
         if (box.intersects(player.getBoundingBox())) {
@@ -71,10 +104,15 @@ public class DoorPortalHandler {
             tag.remove(KEY_Z);
             if (player.getRandom().nextFloat() < 0.05f) {
                 if (player instanceof ServerPlayer sp) {
-                    ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(SleeplessMod.MODID, "nightmare"));
+                    ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(SleeplessMod.MODID, "sleepless_dimension"));
                     ServerLevel target = sp.server.getLevel(key);
-                    if (target != null)
-                        sp.changeDimension(target);
+                    if (target != null) {
+                        tag.putInt(RETURN_X, doorPos.getX());
+                        tag.putInt(RETURN_Y, doorPos.getY());
+                        tag.putInt(RETURN_Z, doorPos.getZ());
+                        tag.putInt(RETURN_TIMER, RETURN_TICKS);
+                        sp.teleportTo(target, DIM_SPAWN_X, DIM_SPAWN_Y, DIM_SPAWN_Z, sp.getYRot(), sp.getXRot());
+                    }
                 }
             }
         }
