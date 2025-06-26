@@ -14,6 +14,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.network.chat.Component;
 
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -21,6 +22,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import net.mcreator.sleepless.SleeplessMod;
+import net.mcreator.sleepless.init.SleeplessModEntities;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +34,10 @@ import java.nio.charset.StandardCharsets;
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
+    /** Flag to ensure the hub structure only generates once per server run. */
+    private static boolean hubPlaced;
+    /** Flag to ensure the Sleepless entity only spawns once when a player enters. */
+    private static boolean entitySpawned;
     private static final ResourceLocation HUB_STRUCTURE = new ResourceLocation(SleeplessMod.MODID, "sleepless_hub");
     private static final ResourceKey<Level> DIMENSION_KEY = ResourceKey.create(Registries.DIMENSION,
             new ResourceLocation(SleeplessMod.MODID, "sleepless_dimension"));
@@ -84,6 +90,7 @@ public class SleeplessDimensionEvents {
             return;
         if (!level.dimension().equals(DIMENSION_KEY))
             return;
+        // Only place the hub the first time the dimension is loaded
         placeHubIfNeeded(level);
     }
 
@@ -100,19 +107,40 @@ public class SleeplessDimensionEvents {
         placeHubIfNeeded(level);
         BlockPos spawnPos = adjustSpawnPos(level);
         player.teleportTo(level, SPAWN_POS.x, spawnPos.getY() + 0.0, SPAWN_POS.z, player.getYRot(), player.getXRot());
+
+        // Spawn the Sleepless entity the first time someone enters the dimension
+        if (!entitySpawned) {
+            var sleepless = SleeplessModEntities.SLEEPLESS.get().create(level);
+            if (sleepless != null) {
+                sleepless.moveTo(SPAWN_POS.x, spawnPos.getY(), SPAWN_POS.z, 0, 0);
+                level.addFreshEntity(sleepless);
+                entitySpawned = true;
+                SleeplessMod.LOGGER.info("Spawned Sleepless at {}", SPAWN_POS);
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("A Sleepless stalks you..."));
+            }
+        }
     }
 
     private static void placeHubIfNeeded(ServerLevel level) {
-        BlockState state = level.getBlockState(HUB_POS);
-        if (!state.isAir())
+        if (hubPlaced)
             return;
+
+        BlockState state = level.getBlockState(HUB_POS);
+        if (!state.isAir()) {
+            hubPlaced = true;
+            return;
+        }
+
         StructureTemplateManager manager = level.getStructureManager();
         StructureTemplate template = manager.getOrCreate(HUB_STRUCTURE);
         if (template == null) {
             SleeplessMod.LOGGER.error("Unable to load structure {}", HUB_STRUCTURE);
             return;
         }
+
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(), level.getRandom(), 2);
+        hubPlaced = true;
+        SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
     }
 
     private static BlockPos adjustSpawnPos(ServerLevel level) {
