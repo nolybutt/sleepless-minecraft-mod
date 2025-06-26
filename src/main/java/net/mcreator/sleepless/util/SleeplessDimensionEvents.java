@@ -46,8 +46,9 @@ public class SleeplessDimensionEvents {
     private static final Vec3 SPAWN_POS;
 
     static {
-        HUB_POS = readBlockPos("sleepless_dimension_spawn_data/structure_block_location.txt");
-        SPAWN_POS = readVec3("sleepless_dimension_spawn_data/player_spawn_location.txt");
+        // Load spawn and hub positions from the new data resource locations.
+        HUB_POS = readBlockPos("data/sleepless/structure_block_location.txt");
+        SPAWN_POS = readVec3("data/sleepless/player_spawn_location.txt");
     }
 
     private static BlockPos readBlockPos(String path) {
@@ -106,7 +107,11 @@ public class SleeplessDimensionEvents {
             return;
         placeHubIfNeeded(level);
         BlockPos spawnPos = adjustSpawnPos(level);
-        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY() + 0.0, SPAWN_POS.z, player.getYRot(), player.getXRot());
+        // Teleport the player to the configured spawn position once the hub is placed
+        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY() + 0.0, SPAWN_POS.z,
+                player.getYRot(), player.getXRot());
+        player.sendSystemMessage(Component.literal("Teleported to Sleepless hub"));
+        SleeplessMod.LOGGER.info("Teleported {} to {}", player.getScoreboardName(), SPAWN_POS);
 
         // Spawn the Sleepless entity the first time someone enters the dimension
         if (!entitySpawned) {
