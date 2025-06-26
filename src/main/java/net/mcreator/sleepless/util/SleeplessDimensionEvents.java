@@ -116,11 +116,13 @@ public class SleeplessDimensionEvents {
     }
 
     private static BlockPos adjustSpawnPos(ServerLevel level) {
-        int y = (int) Math.max(SPAWN_POS.y, HUB_POS.getY() + 1);
-        BlockPos pos = new BlockPos(SPAWN_POS.x, y, SPAWN_POS.z);
-        while (!level.getBlockState(pos).getMaterial().isReplaceable() && y < level.getMaxBuildHeight()) {
+        int x = Mth.floor(SPAWN_POS.x);
+        int z = Mth.floor(SPAWN_POS.z);
+        int y = Math.max(Mth.floor(SPAWN_POS.y), HUB_POS.getY() + 1);
+        BlockPos pos = new BlockPos(x, y, z);
+        while (!level.getBlockState(pos).isAir() && y < level.getMaxBuildHeight()) {
             y++;
-            pos = new BlockPos(SPAWN_POS.x, y, SPAWN_POS.z);
+            pos = new BlockPos(x, y, z);
         }
         return pos;
     }
