@@ -42,46 +42,14 @@ public class SleeplessDimensionEvents {
     private static final ResourceKey<Level> DIMENSION_KEY = ResourceKey.create(Registries.DIMENSION,
             new ResourceLocation(SleeplessMod.MODID, "sleepless_dimension"));
 
+    // Coordinates for the hub structure's placement in the Sleepless dimension
     private static final BlockPos HUB_POS;
+    // Coordinates where players should spawn inside the dimension
     private static final Vec3 SPAWN_POS;
 
     static {
-        HUB_POS = readBlockPos("sleepless_dimension_spawn_data/structure_block_location.txt");
-        SPAWN_POS = readVec3("sleepless_dimension_spawn_data/player_spawn_location.txt");
-    }
-
-    private static BlockPos readBlockPos(String path) {
-        try (InputStream in = SleeplessDimensionEvents.class.getClassLoader().getResourceAsStream(path)) {
-            if (in == null)
-                throw new IOException("Resource not found: " + path);
-            String text = new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
-            text = text.replace("/", " ");
-            String[] parts = text.split("\\s+");
-            double x = Double.parseDouble(parts[0]);
-            double y = Double.parseDouble(parts[1]);
-            double z = Double.parseDouble(parts[2]);
-            return new BlockPos(Mth.floor(x), Mth.floor(y), Mth.floor(z));
-        } catch (Exception e) {
-            SleeplessMod.LOGGER.error("Failed reading block position from {}", path, e);
-            return BlockPos.ZERO;
-        }
-    }
-
-    private static Vec3 readVec3(String path) {
-        try (InputStream in = SleeplessDimensionEvents.class.getClassLoader().getResourceAsStream(path)) {
-            if (in == null)
-                throw new IOException("Resource not found: " + path);
-            String text = new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
-            text = text.replace("/", " ");
-            String[] parts = text.split("\\s+");
-            double x = Double.parseDouble(parts[0]);
-            double y = Double.parseDouble(parts[1]);
-            double z = Double.parseDouble(parts[2]);
-            return new Vec3(x, y, z);
-        } catch (Exception e) {
-            SleeplessMod.LOGGER.error("Failed reading vector from {}", path, e);
-            return Vec3.ZERO;
-        }
+        HUB_POS = readBlockPos("data/sleepless/structure_block_location.txt");
+        SPAWN_POS = readVec3("data/sleepless/player_spawn_location.txt");
     }
 
     @SubscribeEvent
@@ -106,7 +74,11 @@ public class SleeplessDimensionEvents {
             return;
         placeHubIfNeeded(level);
         BlockPos spawnPos = adjustSpawnPos(level);
-        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY() + 0.0, SPAWN_POS.z, player.getYRot(), player.getXRot());
+        // Teleport the player to the configured spawn position once the hub is placed
+        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY() + 0.0, SPAWN_POS.z,
+                player.getYRot(), player.getXRot());
+        player.sendSystemMessage(Component.literal("Teleported to Sleepless hub"));
+        SleeplessMod.LOGGER.info("Teleported {} to {}", player.getScoreboardName(), SPAWN_POS);
 
         // Spawn the Sleepless entity the first time someone enters the dimension
         if (!entitySpawned) {
@@ -153,6 +125,48 @@ public class SleeplessDimensionEvents {
             pos = new BlockPos(x, y, z);
         }
         return pos;
+    }
+
+    /**
+     * Reads a BlockPos from a resource file under src/main/resources.
+     * The file should contain coordinates separated by spaces or slashes.
+     */
+    private static BlockPos readBlockPos(String path) {
+        try (InputStream in = SleeplessDimensionEvents.class.getClassLoader().getResourceAsStream(path)) {
+            if (in == null)
+                throw new IOException("Resource not found: " + path);
+            String text = new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
+            text = text.replace("/", " ");
+            String[] parts = text.split("\\s+");
+            int x = (int) Math.floor(Double.parseDouble(parts[0]));
+            int y = (int) Math.floor(Double.parseDouble(parts[1]));
+            int z = (int) Math.floor(Double.parseDouble(parts[2]));
+            return new BlockPos(x, y, z);
+        } catch (Exception e) {
+            SleeplessMod.LOGGER.error("Failed reading block position from {}", path, e);
+            return BlockPos.ZERO;
+        }
+    }
+
+    /**
+     * Reads a Vec3 from a resource file under src/main/resources.
+     * The file should contain coordinates separated by spaces or slashes.
+     */
+    private static Vec3 readVec3(String path) {
+        try (InputStream in = SleeplessDimensionEvents.class.getClassLoader().getResourceAsStream(path)) {
+            if (in == null)
+                throw new IOException("Resource not found: " + path);
+            String text = new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
+            text = text.replace("/", " ");
+            String[] parts = text.split("\\s+");
+            double x = Double.parseDouble(parts[0]);
+            double y = Double.parseDouble(parts[1]);
+            double z = Double.parseDouble(parts[2]);
+            return new Vec3(x, y, z);
+        } catch (Exception e) {
+            SleeplessMod.LOGGER.error("Failed reading vector from {}", path, e);
+            return Vec3.ZERO;
+        }
     }
 }
 
