@@ -103,7 +103,6 @@ public class SleeplessDimensionEvents {
             hubPlaced = true;
             return;
         }
-
         // Force-load the chunk so generation won't overwrite the hub.
         level.getChunkAt(HUB_POS);
 
@@ -114,7 +113,6 @@ public class SleeplessDimensionEvents {
             SleeplessMod.LOGGER.error("Failed to load template {}", HUB_STRUCTURE);
             return;
         }
-
         SleeplessMod.LOGGER.debug("Template size {}. Placing at {} in {}", template.getSize(), HUB_POS,
                 level.dimension());
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(), level.getRandom(), 2);
