@@ -104,10 +104,10 @@ public class SleeplessDimensionEvents {
             hubPlaced = true;
             return;
         }
-
-        // Attempt to load the template for the hub structure.
+        // Attempt to load the template for the hub structure. get returns an
+        // Optional in 1.20.1, so handle the empty case with a null check.
         StructureTemplateManager manager = level.getStructureManager();
-        StructureTemplate template = manager.get(HUB_STRUCTURE);
+        StructureTemplate template = manager.get(HUB_STRUCTURE).orElse(null);
         if (template == null) {
             SleeplessMod.LOGGER.error("Unable to load structure {}", HUB_STRUCTURE);
             return;
