@@ -29,7 +29,9 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * Sleepless dimension. The hub template now loads with {@code sleepless:sleepless_dimension}
  * and the chunk is force loaded before placement so terrain generation never overwrites the
  * structure. Detailed debug logging shows whether the template is found and where it is
- * placed. Spawn search logic was updated so players never spawn in midair or underground.
+ * placed. Players are teleported exactly to the coordinates in
+ * {@code player_spawn_location.txt}, only shifting upward if that spot is
+ * obstructed.
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -75,8 +77,8 @@ public class SleeplessDimensionEvents {
             return;
         placeHubIfNeeded(level);
         BlockPos spawnPos = adjustSpawnPos(level);
-        // Teleport the player to the configured spawn position once the hub is placed
-        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY() + 0.0, SPAWN_POS.z,
+        // Teleport the player to the exact spawn location, adjusting Y only if obstructed
+        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY(), SPAWN_POS.z,
                 player.getYRot(), player.getXRot());
         player.sendSystemMessage(Component.literal("Teleported to Sleepless hub"));
         SleeplessMod.LOGGER.info("Teleported {} to {}", player.getScoreboardName(), SPAWN_POS);
@@ -106,6 +108,9 @@ public class SleeplessDimensionEvents {
         // Force-load the chunk so generation won't overwrite the hub.
         level.getChunkAt(HUB_POS);
 
+        // Force-load the chunk so generation won't overwrite the hub.
+        level.getChunkAt(HUB_POS);
+
         StructureTemplateManager manager = level.getStructureManager();
         SleeplessMod.LOGGER.debug("Loading template {}", HUB_STRUCTURE);
         StructureTemplate template = manager.getOrCreate(HUB_STRUCTURE);
@@ -123,18 +128,11 @@ public class SleeplessDimensionEvents {
     private static BlockPos adjustSpawnPos(ServerLevel level) {
         int x = Mth.floor(SPAWN_POS.x);
         int z = Mth.floor(SPAWN_POS.z);
-
-        // Start near the configured Y but never below the hub placement.
-        int y = Math.max(Mth.floor(SPAWN_POS.y), HUB_POS.getY() + 1);
+        int y = Mth.floor(SPAWN_POS.y);
         BlockPos pos = new BlockPos(x, y, z);
 
-        // Move downward until we hit solid ground or the bottom of the world.
-        while (y > level.getMinBuildHeight() && level.getBlockState(pos.below()).isAir()) {
-            y--;
-            pos = pos.below();
-        }
+        // Only move upward if the spawn point is inside a block.
 
-        // Move up if the spawn point is obstructed.
         while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
             y++;
             pos = pos.above();
