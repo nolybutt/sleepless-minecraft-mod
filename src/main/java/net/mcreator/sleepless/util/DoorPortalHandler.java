@@ -40,7 +40,8 @@ public class DoorPortalHandler {
     private static final int RETURN_TICKS = 20 * 60 * 3; // 3 minutes
     // Spawn position inside the Sleepless dimension
     private static final double DIM_SPAWN_X = -6.188;
-    private static final double DIM_SPAWN_Y = 80.0;
+    // Spawn higher to ensure the hub doesn't generate underground
+    private static final double DIM_SPAWN_Y = 100.0;
     private static final double DIM_SPAWN_Z = 2.778;
 
     @SubscribeEvent

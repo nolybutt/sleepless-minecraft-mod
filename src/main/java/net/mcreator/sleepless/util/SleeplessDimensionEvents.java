@@ -27,6 +27,10 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
 /**
  * Handles placing the Sleepless hub structure and teleporting players to the spawn location
  * when the Sleepless dimension loads.
+ *
+ * Updated to load "sleepless_dimension.nbt" instead of the old "sleepless_hub" name and
+ * log detailed information during placement. Spawn height is set higher via data files
+ * to avoid underground generation.
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -34,7 +38,10 @@ public class SleeplessDimensionEvents {
     private static boolean hubPlaced;
     /** Flag to ensure the Sleepless entity only spawns once when a player enters. */
     private static boolean entitySpawned;
-    private static final ResourceLocation HUB_STRUCTURE = new ResourceLocation(SleeplessMod.MODID, "sleepless_hub");
+    // Template for the hub built in the Sleepless dimension
+    // File path: data/sleepless/structures/sleepless_dimension.nbt
+    private static final ResourceLocation HUB_STRUCTURE =
+            new ResourceLocation(SleeplessMod.MODID, "sleepless_dimension");
     private static final ResourceKey<Level> DIMENSION_KEY = ResourceKey.create(Registries.DIMENSION,
             new ResourceLocation(SleeplessMod.MODID, "sleepless_dimension"));
 
@@ -105,7 +112,9 @@ public class SleeplessDimensionEvents {
             return;
         }
 
-        template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(), level.getRandom(), 2);
+        SleeplessMod.LOGGER.debug("Placing {} at {}", HUB_STRUCTURE, HUB_POS);
+        template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
+                level.getRandom(), 2);
         hubPlaced = true;
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
     }
