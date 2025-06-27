@@ -26,11 +26,10 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
 
 /**
  * Handles placement of the hub structure and safe teleportation when players enter the
- * Sleepless dimension.  The structure template now loads from
- * {@code data/sleepless/structures/sleepless_dimension.nbt} using the exact
- * {@code sleepless:sleepless_dimension} ID.  Detailed debug logging has been added around
- * template loading and placement and the spawn position search was updated so players never
- * spawn in midair or underground.
+ * Sleepless dimension. The hub template now loads with {@code sleepless:sleepless_dimension}
+ * and the chunk is force loaded before placement so terrain generation never overwrites the
+ * structure. Detailed debug logging shows whether the template is found and where it is
+ * placed. Spawn search logic was updated so players never spawn in midair or underground.
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -104,19 +103,20 @@ public class SleeplessDimensionEvents {
             hubPlaced = true;
             return;
         }
-        // Attempt to load the template for the hub structure. get returns an
-        // Optional in 1.20.1, so handle the empty case with a null check.
+        // Force-load the chunk so generation won't overwrite the hub.
+        level.getChunkAt(HUB_POS);
+
         StructureTemplateManager manager = level.getStructureManager();
-        StructureTemplate template = manager.get(HUB_STRUCTURE).orElse(null);
+        SleeplessMod.LOGGER.debug("Loading template {}", HUB_STRUCTURE);
+        StructureTemplate template = manager.getOrCreate(HUB_STRUCTURE);
         if (template == null) {
-            SleeplessMod.LOGGER.error("Unable to load structure {}", HUB_STRUCTURE);
+            SleeplessMod.LOGGER.error("Failed to load template {}", HUB_STRUCTURE);
             return;
         }
 
-        SleeplessMod.LOGGER.debug("Loaded template {} size {}", HUB_STRUCTURE, template.getSize());
-        SleeplessMod.LOGGER.debug("Placing {} at {} in {}", HUB_STRUCTURE, HUB_POS, level.dimension());
-        template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
-                level.getRandom(), 2);
+        SleeplessMod.LOGGER.debug("Template size {}. Placing at {} in {}", template.getSize(), HUB_POS,
+                level.dimension());
+        template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(), level.getRandom(), 2);
         hubPlaced = true;
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
     }
