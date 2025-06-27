@@ -24,10 +24,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.mcreator.sleepless.SleeplessMod;
 import net.mcreator.sleepless.init.SleeplessModEntities;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
 /**
  * Handles placing the Sleepless hub structure and teleporting players to the spawn location
  * when the Sleepless dimension loads.
@@ -51,7 +47,6 @@ public class SleeplessDimensionEvents {
         HUB_POS = readBlockPos("data/sleepless/structure_block_location.txt");
         SPAWN_POS = readVec3("data/sleepless/player_spawn_location.txt");
     }
-
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
         if (!(event.getLevel() instanceof ServerLevel level))
