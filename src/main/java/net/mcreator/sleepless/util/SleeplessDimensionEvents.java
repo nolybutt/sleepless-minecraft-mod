@@ -104,7 +104,6 @@ public class SleeplessDimensionEvents {
             hubPlaced = true;
             return;
         }
-
         // Attempt to load the template for the hub structure. get returns an
         // Optional in 1.20.1, so handle the empty case with a null check.
         StructureTemplateManager manager = level.getStructureManager();
