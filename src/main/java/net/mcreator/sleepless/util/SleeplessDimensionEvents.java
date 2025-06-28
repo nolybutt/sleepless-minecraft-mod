@@ -24,7 +24,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.mcreator.sleepless.SleeplessMod;
 import net.mcreator.sleepless.init.SleeplessModEntities;
 
-/**
+ /**
  * Handles placement of the Sleepless hub and safe teleportation when players
  * enter the dimension.
  *
@@ -121,6 +121,7 @@ public class SleeplessDimensionEvents {
         level.getChunkAt(HUB_POS);
 
         StructureTemplateManager manager = level.getStructureManager();
+      
         SleeplessMod.LOGGER.debug("Loading template {} for hub", HUB_STRUCTURE);
         var optionalTemplate = manager.get(HUB_STRUCTURE);
         if (optionalTemplate.isEmpty()) {
@@ -129,11 +130,13 @@ public class SleeplessDimensionEvents {
         }
         StructureTemplate template = optionalTemplate.get();
 
+
         SleeplessMod.LOGGER.debug("Template size {}. Placing hub at {} in {}", template.getSize(), HUB_POS,
                 level.dimension());
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
                 level.getRandom(), 2);
         SleeplessMod.LOGGER.debug("Hub placed at coordinates {}", HUB_POS);
+
         hubPlaced = true;
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
     }
@@ -156,6 +159,7 @@ public class SleeplessDimensionEvents {
         }
 
         // If the spawn block itself is obstructed, shift upward into air
+
         while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
             y++;
             pos = pos.above();
