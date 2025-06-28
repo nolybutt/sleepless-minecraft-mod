@@ -24,16 +24,17 @@ import net.minecraftforge.fml.common.Mod;
 import net.mcreator.sleepless.SleeplessMod;
 import net.mcreator.sleepless.init.SleeplessModEntities;
 
- /**
+/**
  * Handles placement of the Sleepless hub and safe teleportation when players
  * enter the dimension.
  *
- * <p><strong>Summary of fixes</strong>: the hub structure is loaded via
- * {@code sleepless:sleepless_dimension} and an optional template check ensures
- * missing resources are logged. Additional debug logs print the placement
- * coordinates and whether the template loaded. The spawn position now searches
- * downward for solid ground and only shifts upward when obstructed, preventing
- * players from falling or suffocating.</p>
+ * <p><strong>Summary of fixes</strong>: the hub structure now always loads with
+ * {@code StructureTemplateManager#getOrCreate} using the ID
+ * {@code sleepless:sleepless_dimension}. The target chunk is forced to stay
+ * loaded while the hub places, with debug logs reporting load success and
+ * exact placement coordinates. Spawn position logic searches downward for
+ * ground and only shifts upward when obstructed so players never spawn in
+ * midair or underground.</p>
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -117,15 +118,21 @@ public class SleeplessDimensionEvents {
         if (hubPlaced)
             return;
 
-        // Load/generate the chunk at the hub coordinates before placement
+
+        // Load/generate and force the chunk at the hub coordinates before placement
         level.getChunkAt(HUB_POS);
+        int chunkX = HUB_POS.getX() >> 4;
+        int chunkZ = HUB_POS.getZ() >> 4;
+        level.setChunkForced(chunkX, chunkZ, true);
 
         StructureTemplateManager manager = level.getStructureManager();
-      
         SleeplessMod.LOGGER.debug("Loading template {} for hub", HUB_STRUCTURE);
-        var optionalTemplate = manager.get(HUB_STRUCTURE);
-        if (optionalTemplate.isEmpty()) {
-            SleeplessMod.LOGGER.error("Hub template {} missing", HUB_STRUCTURE);
+        StructureTemplate template;
+        try {
+            template = manager.getOrCreate(HUB_STRUCTURE);
+        } catch (Exception e) {
+            SleeplessMod.LOGGER.error("Failed loading template {}", HUB_STRUCTURE, e);
+
             return;
         }
         StructureTemplate template = optionalTemplate.get();
@@ -138,6 +145,7 @@ public class SleeplessDimensionEvents {
         SleeplessMod.LOGGER.debug("Hub placed at coordinates {}", HUB_POS);
 
         hubPlaced = true;
+        level.setChunkForced(chunkX, chunkZ, false);
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
     }
 
