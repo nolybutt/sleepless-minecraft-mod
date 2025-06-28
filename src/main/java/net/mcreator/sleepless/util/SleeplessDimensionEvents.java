@@ -34,7 +34,10 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * placement coordinates printed. The hub chunk is forced while placing the
  * structure. Players now spawn relative to the hub &mdash; 22 blocks south and
  * 7 blocks above the structure block &mdash; ensuring a safe location on every
- * teleport. Debug logs make failures explicit.</p>
+ * teleport. A previous version offset on the Z axis; the corrected logic uses
+ * the X axis so players appear inside the hub. Debug logs make failures
+ * explicit.</p>
+
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -54,8 +57,10 @@ public class SleeplessDimensionEvents {
     private static final BlockPos HUB_POS;
 
     // Offset from the structure block to the player spawn point.
-    // Players spawn 22 blocks south and 7 blocks above the hub.
-    private static final BlockPos SPAWN_OFFSET = new BlockPos(0, 7, 22);
+    // Players spawn 22 blocks south and 7 blocks above the hub. The previous
+    // implementation misplaced the spawn along the Z axis; the correct offset
+    // uses the X axis.
+    private static final BlockPos SPAWN_OFFSET = new BlockPos(22, 7, 0);
 
 
     static {
