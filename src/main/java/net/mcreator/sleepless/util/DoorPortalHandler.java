@@ -20,6 +20,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import net.mcreator.sleepless.SleeplessMod;
 import net.mcreator.sleepless.entity.SleeplessEntity;
+import net.mcreator.sleepless.util.SleeplessDimensionEvents;
 
 import java.util.List;
 
@@ -108,6 +109,7 @@ public class DoorPortalHandler {
                     ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(SleeplessMod.MODID, "sleepless_dimension"));
                     ServerLevel target = sp.server.getLevel(key);
                     if (target != null) {
+                        SleeplessDimensionEvents.ensureHubPlaced(target);
                         tag.putInt(RETURN_X, doorPos.getX());
                         tag.putInt(RETURN_Y, doorPos.getY());
                         tag.putInt(RETURN_Z, doorPos.getZ());

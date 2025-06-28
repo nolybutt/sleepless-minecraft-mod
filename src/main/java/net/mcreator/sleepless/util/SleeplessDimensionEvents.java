@@ -25,12 +25,15 @@ import net.mcreator.sleepless.SleeplessMod;
 import net.mcreator.sleepless.init.SleeplessModEntities;
 
 /**
- * Handles placing the Sleepless hub structure and teleporting players to the spawn location
- * when the Sleepless dimension loads.
+ * Handles placement of the Sleepless hub and safe teleportation when players
+ * enter the dimension.
  *
- * Updated to load "sleepless_dimension.nbt" instead of the old "sleepless_hub" name and
- * log detailed information during placement. Spawn height is set higher via data files
- * to avoid underground generation.
+ * <p><strong>Summary of fixes</strong>: the hub structure is loaded via
+ * {@code sleepless:sleepless_dimension} and an optional template check ensures
+ * missing resources are logged. Additional debug logs print the placement
+ * coordinates and whether the template loaded. The spawn position now searches
+ * downward for solid ground and only shifts upward when obstructed, preventing
+ * players from falling or suffocating.</p>
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -40,8 +43,9 @@ public class SleeplessDimensionEvents {
     private static boolean entitySpawned;
     // Template for the hub built in the Sleepless dimension
     // File path: data/sleepless/structures/sleepless_dimension.nbt
+    // NBT name for the hub structure used by both /place command and code
     private static final ResourceLocation HUB_STRUCTURE =
-            new ResourceLocation(SleeplessMod.MODID, "sleepless_dimension");
+            new ResourceLocation("sleepless", "sleepless_dimension");
     private static final ResourceKey<Level> DIMENSION_KEY = ResourceKey.create(Registries.DIMENSION,
             new ResourceLocation(SleeplessMod.MODID, "sleepless_dimension"));
 
@@ -54,6 +58,16 @@ public class SleeplessDimensionEvents {
         HUB_POS = readBlockPos("data/sleepless/structure_block_location.txt");
         SPAWN_POS = readVec3("data/sleepless/player_spawn_location.txt");
     }
+
+    /** Public accessor for the Sleepless dimension key. */
+    public static ResourceKey<Level> dimensionKey() {
+        return DIMENSION_KEY;
+    }
+
+    /** Returns the configured spawn vector loaded from the resource file. */
+    public static Vec3 getSpawnVec() {
+        return SPAWN_POS;
+    }
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
         if (!(event.getLevel() instanceof ServerLevel level))
@@ -61,7 +75,7 @@ public class SleeplessDimensionEvents {
         if (!level.dimension().equals(DIMENSION_KEY))
             return;
         // Only place the hub the first time the dimension is loaded
-        placeHubIfNeeded(level);
+        ensureHubPlaced(level);
     }
 
     @SubscribeEvent
@@ -74,10 +88,10 @@ public class SleeplessDimensionEvents {
         ServerLevel level = player.server.getLevel(DIMENSION_KEY);
         if (level == null)
             return;
-        placeHubIfNeeded(level);
+        ensureHubPlaced(level);
         BlockPos spawnPos = adjustSpawnPos(level);
-        // Teleport the player to the configured spawn position once the hub is placed
-        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY() + 0.0, SPAWN_POS.z,
+        // Teleport the player to the exact spawn location, adjusting Y only if obstructed
+        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY(), SPAWN_POS.z,
                 player.getYRot(), player.getXRot());
         player.sendSystemMessage(Component.literal("Teleported to Sleepless hub"));
         SleeplessMod.LOGGER.info("Teleported {} to {}", player.getScoreboardName(), SPAWN_POS);
@@ -95,39 +109,58 @@ public class SleeplessDimensionEvents {
         }
     }
 
-    private static void placeHubIfNeeded(ServerLevel level) {
+    /**
+     * Ensures the hub structure exists in the target level. This method may be
+     * called multiple times but the hub will only be placed once.
+     */
+    public static void ensureHubPlaced(ServerLevel level) {
         if (hubPlaced)
             return;
 
-        BlockState state = level.getBlockState(HUB_POS);
-        if (!state.isAir()) {
-            hubPlaced = true;
-            return;
-        }
+        // Load/generate the chunk at the hub coordinates before placement
+        level.getChunkAt(HUB_POS);
 
         StructureTemplateManager manager = level.getStructureManager();
-        StructureTemplate template = manager.getOrCreate(HUB_STRUCTURE);
-        if (template == null) {
-            SleeplessMod.LOGGER.error("Unable to load structure {}", HUB_STRUCTURE);
+        SleeplessMod.LOGGER.debug("Loading template {} for hub", HUB_STRUCTURE);
+        var optionalTemplate = manager.get(HUB_STRUCTURE);
+        if (optionalTemplate.isEmpty()) {
+            SleeplessMod.LOGGER.error("Hub template {} missing", HUB_STRUCTURE);
             return;
         }
+        StructureTemplate template = optionalTemplate.get();
 
-        SleeplessMod.LOGGER.debug("Placing {} at {}", HUB_STRUCTURE, HUB_POS);
+        SleeplessMod.LOGGER.debug("Template size {}. Placing hub at {} in {}", template.getSize(), HUB_POS,
+                level.dimension());
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
                 level.getRandom(), 2);
+        SleeplessMod.LOGGER.debug("Hub placed at coordinates {}", HUB_POS);
         hubPlaced = true;
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
     }
 
-    private static BlockPos adjustSpawnPos(ServerLevel level) {
+    /**
+     * Calculates a safe spawn position based on the configured spawn vector.
+     * Moves upward only when the location is obstructed.
+     */
+    public static BlockPos adjustSpawnPos(ServerLevel level) {
         int x = Mth.floor(SPAWN_POS.x);
         int z = Mth.floor(SPAWN_POS.z);
-        int y = Math.max(Mth.floor(SPAWN_POS.y), HUB_POS.getY() + 1);
+        int y = Mth.floor(SPAWN_POS.y);
         BlockPos pos = new BlockPos(x, y, z);
-        while (!level.getBlockState(pos).isAir() && y < level.getMaxBuildHeight()) {
-            y++;
-            pos = new BlockPos(x, y, z);
+
+        // Walk downward until we find solid ground beneath the spawn point
+        while (y > level.getMinBuildHeight() &&
+                level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty()) {
+            y--;
+            pos = pos.below();
         }
+
+        // If the spawn block itself is obstructed, shift upward into air
+        while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
+            y++;
+            pos = pos.above();
+        }
+
         return pos;
     }
 
