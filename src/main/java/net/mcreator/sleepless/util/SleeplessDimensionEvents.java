@@ -72,6 +72,7 @@ public class SleeplessDimensionEvents {
     public static Vec3 getSpawnVec() {
         return new Vec3(HUB_POS.getX() + SPAWN_OFFSET.x, HUB_POS.getY() + SPAWN_OFFSET.y,
                 HUB_POS.getZ() + SPAWN_OFFSET.z);
+
     }
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
@@ -98,6 +99,7 @@ public class SleeplessDimensionEvents {
         BlockPos spawnPos = adjustSpawnPos(level);
         // Teleport the player to the spawn relative to the hub structure
         player.teleportTo(level, targetVec.x, spawnPos.getY(), targetVec.z,
+
                 player.getYRot(), player.getXRot());
         player.sendSystemMessage(Component.literal("Teleported to Sleepless hub"));
         SleeplessMod.LOGGER.info("Teleported {} to {}", player.getScoreboardName(), targetVec);
@@ -144,6 +146,7 @@ public class SleeplessDimensionEvents {
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
                 level.getRandom(), 2);
         SleeplessMod.LOGGER.debug("Hub placed at coordinates {}", HUB_POS);
+
         hubPlaced = true;
         level.setChunkForced(chunkX, chunkZ, false);
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
@@ -154,16 +157,19 @@ public class SleeplessDimensionEvents {
      * Moves upward only when the location is obstructed.
      */
     public static BlockPos adjustSpawnPos(ServerLevel level) {
+
         Vec3 vec = getSpawnVec();
         int x = Mth.floor(vec.x);
         int z = Mth.floor(vec.z);
         int estimatedY = Mth.floor(vec.y);
+
 
         BlockPos start = new BlockPos(x, estimatedY, z);
         BlockPos pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, start);
 
         if (pos.getY() < level.getMinBuildHeight()) {
             pos = new BlockPos(x, level.getMinBuildHeight(), z);
+
         }
 
         return pos;

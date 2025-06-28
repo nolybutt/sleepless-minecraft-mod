@@ -45,6 +45,7 @@ public class DoorSpawnCommand {
         BlockPos spawn = SleeplessDimensionEvents.adjustSpawnPos(level);
         player.teleportTo(level, target.x, spawn.getY(), target.z,
                 player.getYRot(), player.getXRot());
+
         source.sendSuccess(() -> Component.literal("Teleported to Sleepless door spawn"), true);
         return 1;
     }
