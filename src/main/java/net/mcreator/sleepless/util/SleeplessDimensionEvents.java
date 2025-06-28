@@ -54,8 +54,8 @@ public class SleeplessDimensionEvents {
     private static final BlockPos HUB_POS;
 
     // Offset from the structure block to the player spawn point.
-    // Players spawn 2 blocks west, 22 blocks south and 7 blocks above the hub.
-    private static final BlockPos SPAWN_OFFSET = new BlockPos(-2, 7, 22);
+    // Players spawn 22 blocks south and 7 blocks above the hub.
+    private static final BlockPos SPAWN_OFFSET = new BlockPos(0, 7, 22);
 
 
     static {
