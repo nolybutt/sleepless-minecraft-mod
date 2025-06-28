@@ -33,7 +33,8 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * {@code player_spawn_location.txt}, only shifting upward if that spot is
  * obstructed. The hub now always places even if terrain exists at the target
  * block and {@link #ensureHubPlaced(ServerLevel)} can be called from other
- * handlers before teleporting players.
+ * handlers before teleporting players. Helper accessors expose the dimension key
+ * and spawn position so commands can teleport players for testing.
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -56,6 +57,16 @@ public class SleeplessDimensionEvents {
     static {
         HUB_POS = readBlockPos("data/sleepless/structure_block_location.txt");
         SPAWN_POS = readVec3("data/sleepless/player_spawn_location.txt");
+    }
+
+    /** Public accessor for the Sleepless dimension key. */
+    public static ResourceKey<Level> dimensionKey() {
+        return DIMENSION_KEY;
+    }
+
+    /** Returns the configured spawn vector loaded from the resource file. */
+    public static Vec3 getSpawnVec() {
+        return SPAWN_POS;
     }
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
@@ -106,7 +117,6 @@ public class SleeplessDimensionEvents {
         if (hubPlaced)
             return;
 
-
         // Load/generate the chunk at the hub coordinates before placement
         level.getChunkAt(HUB_POS);
 
@@ -117,6 +127,7 @@ public class SleeplessDimensionEvents {
             SleeplessMod.LOGGER.error("Failed to load template {}", HUB_STRUCTURE);
             return;
         }
+
         SleeplessMod.LOGGER.debug("Template size {}. Placing at {} in {}", template.getSize(), HUB_POS,
                 level.dimension());
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(), level.getRandom(), 2);
@@ -124,14 +135,17 @@ public class SleeplessDimensionEvents {
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
     }
 
-    private static BlockPos adjustSpawnPos(ServerLevel level) {
+    /**
+     * Calculates a safe spawn position based on the configured spawn vector.
+     * Moves upward only when the location is obstructed.
+     */
+    public static BlockPos adjustSpawnPos(ServerLevel level) {
         int x = Mth.floor(SPAWN_POS.x);
         int z = Mth.floor(SPAWN_POS.z);
         int y = Mth.floor(SPAWN_POS.y);
         BlockPos pos = new BlockPos(x, y, z);
 
         // Only move upward if the spawn point is inside a block.
-
 
         while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
             y++;
