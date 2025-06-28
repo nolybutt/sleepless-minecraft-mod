@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,8 +52,11 @@ public class SleeplessDimensionEvents {
 
     // Coordinates for the hub structure's placement in the Sleepless dimension
     private static final BlockPos HUB_POS;
-    // Offset from the structure block to the player spawn point
-    private static final Vec3 SPAWN_OFFSET = new Vec3(0.5, 7.0, 22.5);
+
+    // Offset from the structure block to the player spawn point.
+    // Players spawn 22 blocks south and 7 blocks above the hub.
+    private static final BlockPos SPAWN_OFFSET = new BlockPos(0, 7, 22);
+
 
     static {
         HUB_POS = readBlockPos("data/sleepless/structure_block_location.txt");
@@ -70,8 +72,9 @@ public class SleeplessDimensionEvents {
      * Players spawn 22 blocks south and 7 blocks above the hub.
      */
     public static Vec3 getSpawnVec() {
-        return new Vec3(HUB_POS.getX() + SPAWN_OFFSET.x, HUB_POS.getY() + SPAWN_OFFSET.y,
-                HUB_POS.getZ() + SPAWN_OFFSET.z);
+
+        BlockPos block = HUB_POS.offset(SPAWN_OFFSET);
+        return new Vec3(block.getX() + 0.5, block.getY(), block.getZ() + 0.5);
 
     }
     @SubscribeEvent
@@ -158,13 +161,11 @@ public class SleeplessDimensionEvents {
      */
     public static BlockPos adjustSpawnPos(ServerLevel level) {
 
-        Vec3 vec = getSpawnVec();
-        int x = Mth.floor(vec.x);
-        int z = Mth.floor(vec.z);
-        int estimatedY = Mth.floor(vec.y);
+        BlockPos start = HUB_POS.offset(SPAWN_OFFSET);
+        int x = start.getX();
+        int z = start.getZ();
 
 
-        BlockPos start = new BlockPos(x, estimatedY, z);
         BlockPos pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, start);
 
         if (pos.getY() < level.getMinBuildHeight()) {
