@@ -36,7 +36,6 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * structure. Players now spawn relative to the hub &mdash; 22 blocks south and
  * 7 blocks above the structure block &mdash; ensuring a safe location on every
  * teleport. Debug logs make failures explicit.</p>
-
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -73,16 +72,7 @@ public class SleeplessDimensionEvents {
     public static Vec3 getSpawnVec() {
         return new Vec3(HUB_POS.getX() + SPAWN_OFFSET.x, HUB_POS.getY() + SPAWN_OFFSET.y,
                 HUB_POS.getZ() + SPAWN_OFFSET.z);
-    }
 
-    /** Public accessor for the Sleepless dimension key. */
-    public static ResourceKey<Level> dimensionKey() {
-        return DIMENSION_KEY;
-    }
-
-    /** Returns the configured spawn vector loaded from the resource file. */
-    public static Vec3 getSpawnVec() {
-        return SPAWN_POS;
     }
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
