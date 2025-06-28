@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -39,11 +40,6 @@ public class DoorPortalHandler {
     private static final String RETURN_TIMER = "sleepless_return_timer";
 
     private static final int RETURN_TICKS = 20 * 60 * 3; // 3 minutes
-    // Spawn position inside the Sleepless dimension
-    private static final double DIM_SPAWN_X = -6.188;
-    // Spawn higher to ensure the hub doesn't generate underground
-    private static final double DIM_SPAWN_Y = 100.0;
-    private static final double DIM_SPAWN_Z = 2.778;
 
     @SubscribeEvent
     public static void onDoorOpened(PlayerInteractEvent.RightClickBlock event) {
@@ -114,7 +110,9 @@ public class DoorPortalHandler {
                         tag.putInt(RETURN_Y, doorPos.getY());
                         tag.putInt(RETURN_Z, doorPos.getZ());
                         tag.putInt(RETURN_TIMER, RETURN_TICKS);
-                        sp.teleportTo(target, DIM_SPAWN_X, DIM_SPAWN_Y, DIM_SPAWN_Z, sp.getYRot(), sp.getXRot());
+                        Vec3 targetVec = SleeplessDimensionEvents.getSpawnVec();
+                        BlockPos safe = SleeplessDimensionEvents.adjustSpawnPos(target);
+                        sp.teleportTo(target, targetVec.x, safe.getY(), targetVec.z, sp.getYRot(), sp.getXRot());
                     }
                 }
             }

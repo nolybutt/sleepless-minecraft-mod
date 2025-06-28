@@ -15,6 +15,7 @@ import net.mcreator.sleepless.SleeplessMod;
 import net.mcreator.sleepless.util.SleeplessDimensionEvents;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Command to teleport the executing player to the same location the door
@@ -40,9 +41,11 @@ public class DoorSpawnCommand {
             return 0;
         }
         SleeplessDimensionEvents.ensureHubPlaced(level);
+        Vec3 target = SleeplessDimensionEvents.getSpawnVec();
         BlockPos spawn = SleeplessDimensionEvents.adjustSpawnPos(level);
-        player.teleportTo(level, SleeplessDimensionEvents.getSpawnVec().x, spawn.getY(),
-                SleeplessDimensionEvents.getSpawnVec().z, player.getYRot(), player.getXRot());
+        player.teleportTo(level, target.x, spawn.getY(), target.z,
+                player.getYRot(), player.getXRot());
+
         source.sendSuccess(() -> Component.literal("Teleported to Sleepless door spawn"), true);
         return 1;
     }

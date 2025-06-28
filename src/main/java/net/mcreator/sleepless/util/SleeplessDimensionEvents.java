@@ -33,8 +33,10 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * via {@code StructureTemplateManager#get} using the ID
  * {@code sleepless:sleepless_dimension}. Failures are logged and the attempted
  * placement coordinates printed. The hub chunk is forced while placing the
- * structure. Spawn logic finds solid ground at the configured coordinates so
- * players never fall or suffocate.</p>
+ * structure. Players now spawn relative to the hub &mdash; 22 blocks south and
+ * 7 blocks above the structure block &mdash; ensuring a safe location on every
+ * teleport. Debug logs make failures explicit.</p>
+
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -52,12 +54,25 @@ public class SleeplessDimensionEvents {
 
     // Coordinates for the hub structure's placement in the Sleepless dimension
     private static final BlockPos HUB_POS;
-    // Coordinates where players should spawn inside the dimension
-    private static final Vec3 SPAWN_POS;
+    // Offset from the structure block to the player spawn point
+    private static final Vec3 SPAWN_OFFSET = new Vec3(0.5, 7.0, 22.5);
 
     static {
         HUB_POS = readBlockPos("data/sleepless/structure_block_location.txt");
-        SPAWN_POS = readVec3("data/sleepless/player_spawn_location.txt");
+    }
+
+    /** Public accessor for the Sleepless dimension key. */
+    public static ResourceKey<Level> dimensionKey() {
+        return DIMENSION_KEY;
+    }
+
+    /**
+     * Calculates the absolute spawn vector relative to the hub structure block.
+     * Players spawn 22 blocks south and 7 blocks above the hub.
+     */
+    public static Vec3 getSpawnVec() {
+        return new Vec3(HUB_POS.getX() + SPAWN_OFFSET.x, HUB_POS.getY() + SPAWN_OFFSET.y,
+                HUB_POS.getZ() + SPAWN_OFFSET.z);
     }
 
     /** Public accessor for the Sleepless dimension key. */
@@ -90,21 +105,23 @@ public class SleeplessDimensionEvents {
         if (level == null)
             return;
         ensureHubPlaced(level);
+        Vec3 targetVec = getSpawnVec();
         BlockPos spawnPos = adjustSpawnPos(level);
-        // Teleport the player to the exact spawn location, adjusting Y only if obstructed
-        player.teleportTo(level, SPAWN_POS.x, spawnPos.getY(), SPAWN_POS.z,
+        // Teleport the player to the spawn relative to the hub structure
+        player.teleportTo(level, targetVec.x, spawnPos.getY(), targetVec.z,
+
                 player.getYRot(), player.getXRot());
         player.sendSystemMessage(Component.literal("Teleported to Sleepless hub"));
-        SleeplessMod.LOGGER.info("Teleported {} to {}", player.getScoreboardName(), SPAWN_POS);
+        SleeplessMod.LOGGER.info("Teleported {} to {}", player.getScoreboardName(), targetVec);
 
         // Spawn the Sleepless entity the first time someone enters the dimension
         if (!entitySpawned) {
             var sleepless = SleeplessModEntities.SLEEPLESS.get().create(level);
             if (sleepless != null) {
-                sleepless.moveTo(SPAWN_POS.x, spawnPos.getY(), SPAWN_POS.z, 0, 0);
+                sleepless.moveTo(targetVec.x, spawnPos.getY(), targetVec.z, 0, 0);
                 level.addFreshEntity(sleepless);
                 entitySpawned = true;
-                SleeplessMod.LOGGER.info("Spawned Sleepless at {}", SPAWN_POS);
+                SleeplessMod.LOGGER.info("Spawned Sleepless at {}", targetVec);
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal("A Sleepless stalks you..."));
             }
         }
@@ -126,7 +143,6 @@ public class SleeplessDimensionEvents {
 
         StructureTemplateManager manager = level.getStructureManager();
         SleeplessMod.LOGGER.debug("Loading template {} for hub", HUB_STRUCTURE);
-
         var optionalTemplate = manager.get(HUB_STRUCTURE);
         if (optionalTemplate.isEmpty()) {
             SleeplessMod.LOGGER.error("Missing template {} when placing hub", HUB_STRUCTURE);
@@ -151,10 +167,12 @@ public class SleeplessDimensionEvents {
      * Moves upward only when the location is obstructed.
      */
     public static BlockPos adjustSpawnPos(ServerLevel level) {
-        int x = Mth.floor(SPAWN_POS.x);
-        int z = Mth.floor(SPAWN_POS.z);
 
-        int estimatedY = Mth.floor(SPAWN_POS.y);
+        Vec3 vec = getSpawnVec();
+        int x = Mth.floor(vec.x);
+        int z = Mth.floor(vec.z);
+        int estimatedY = Mth.floor(vec.y);
+
 
         BlockPos start = new BlockPos(x, estimatedY, z);
         BlockPos pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, start);
