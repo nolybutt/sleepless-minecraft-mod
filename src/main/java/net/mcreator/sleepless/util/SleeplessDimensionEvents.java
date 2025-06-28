@@ -31,7 +31,9 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * structure. Detailed debug logging shows whether the template is found and where it is
  * placed. Players are teleported exactly to the coordinates in
  * {@code player_spawn_location.txt}, only shifting upward if that spot is
- * obstructed.
+ * obstructed. The hub now always places even if terrain exists at the target
+ * block and {@link #ensureHubPlaced(ServerLevel)} can be called from other
+ * handlers before teleporting players.
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -62,7 +64,7 @@ public class SleeplessDimensionEvents {
         if (!level.dimension().equals(DIMENSION_KEY))
             return;
         // Only place the hub the first time the dimension is loaded
-        placeHubIfNeeded(level);
+        ensureHubPlaced(level);
     }
 
     @SubscribeEvent
@@ -75,7 +77,7 @@ public class SleeplessDimensionEvents {
         ServerLevel level = player.server.getLevel(DIMENSION_KEY);
         if (level == null)
             return;
-        placeHubIfNeeded(level);
+        ensureHubPlaced(level);
         BlockPos spawnPos = adjustSpawnPos(level);
         // Teleport the player to the exact spawn location, adjusting Y only if obstructed
         player.teleportTo(level, SPAWN_POS.x, spawnPos.getY(), SPAWN_POS.z,
@@ -96,19 +98,16 @@ public class SleeplessDimensionEvents {
         }
     }
 
-    private static void placeHubIfNeeded(ServerLevel level) {
+    /**
+     * Ensures the hub structure exists in the target level. This method may be
+     * called multiple times but the hub will only be placed once.
+     */
+    public static void ensureHubPlaced(ServerLevel level) {
         if (hubPlaced)
             return;
 
-        BlockState state = level.getBlockState(HUB_POS);
-        if (!state.isAir()) {
-            hubPlaced = true;
-            return;
-        }
-        // Force-load the chunk so generation won't overwrite the hub.
-        level.getChunkAt(HUB_POS);
 
-        // Force-load the chunk so generation won't overwrite the hub.
+        // Load/generate the chunk at the hub coordinates before placement
         level.getChunkAt(HUB_POS);
 
         StructureTemplateManager manager = level.getStructureManager();
@@ -132,6 +131,7 @@ public class SleeplessDimensionEvents {
         BlockPos pos = new BlockPos(x, y, z);
 
         // Only move upward if the spawn point is inside a block.
+
 
         while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
             y++;
