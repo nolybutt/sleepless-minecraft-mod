@@ -106,6 +106,7 @@ public class SleeplessDimensionEvents {
         if (hubPlaced)
             return;
 
+
         // Load/generate the chunk at the hub coordinates before placement
         level.getChunkAt(HUB_POS);
 
@@ -116,7 +117,6 @@ public class SleeplessDimensionEvents {
             SleeplessMod.LOGGER.error("Failed to load template {}", HUB_STRUCTURE);
             return;
         }
-
         SleeplessMod.LOGGER.debug("Template size {}. Placing at {} in {}", template.getSize(), HUB_POS,
                 level.dimension());
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(), level.getRandom(), 2);
@@ -131,6 +131,8 @@ public class SleeplessDimensionEvents {
         BlockPos pos = new BlockPos(x, y, z);
 
         // Only move upward if the spawn point is inside a block.
+
+
         while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
             y++;
             pos = pos.above();
