@@ -146,6 +146,7 @@ public class SleeplessDimensionEvents {
         BlockPos pos = new BlockPos(x, y, z);
 
         // Only move upward if the spawn point is inside a block.
+
         while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
             y++;
             pos = pos.above();
