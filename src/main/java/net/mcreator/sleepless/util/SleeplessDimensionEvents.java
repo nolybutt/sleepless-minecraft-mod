@@ -126,6 +126,7 @@ public class SleeplessDimensionEvents {
 
         StructureTemplateManager manager = level.getStructureManager();
         SleeplessMod.LOGGER.debug("Loading template {} for hub", HUB_STRUCTURE);
+
         var optionalTemplate = manager.get(HUB_STRUCTURE);
         if (optionalTemplate.isEmpty()) {
             SleeplessMod.LOGGER.error("Missing template {} when placing hub", HUB_STRUCTURE);
@@ -139,6 +140,7 @@ public class SleeplessDimensionEvents {
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
                 level.getRandom(), 2);
         SleeplessMod.LOGGER.debug("Hub placed at coordinates {}", HUB_POS);
+
         hubPlaced = true;
         level.setChunkForced(chunkX, chunkZ, false);
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
@@ -151,6 +153,7 @@ public class SleeplessDimensionEvents {
     public static BlockPos adjustSpawnPos(ServerLevel level) {
         int x = Mth.floor(SPAWN_POS.x);
         int z = Mth.floor(SPAWN_POS.z);
+
         int estimatedY = Mth.floor(SPAWN_POS.y);
 
         BlockPos start = new BlockPos(x, estimatedY, z);
@@ -158,6 +161,7 @@ public class SleeplessDimensionEvents {
 
         if (pos.getY() < level.getMinBuildHeight()) {
             pos = new BlockPos(x, level.getMinBuildHeight(), z);
+
         }
 
         return pos;
