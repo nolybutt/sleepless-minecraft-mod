@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.level.LevelEvent;
@@ -28,13 +29,12 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * Handles placement of the Sleepless hub and safe teleportation when players
  * enter the dimension.
  *
- * <p><strong>Summary of fixes</strong>: the hub structure now always loads with
- * {@code StructureTemplateManager#getOrCreate} using the ID
- * {@code sleepless:sleepless_dimension}. The target chunk is forced to stay
- * loaded while the hub places, with debug logs reporting load success and
- * exact placement coordinates. Spawn position logic searches downward for
- * ground and only shifts upward when obstructed so players never spawn in
- * midair or underground.</p>
+ * <p><strong>Summary of fixes</strong>: hub placement now checks the template
+ * via {@code StructureTemplateManager#get} using the ID
+ * {@code sleepless:sleepless_dimension}. Failures are logged and the attempted
+ * placement coordinates printed. The hub chunk is forced while placing the
+ * structure. Spawn logic finds solid ground at the configured coordinates so
+ * players never fall or suffocate.</p>
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -118,7 +118,6 @@ public class SleeplessDimensionEvents {
         if (hubPlaced)
             return;
 
-
         // Load/generate and force the chunk at the hub coordinates before placement
         level.getChunkAt(HUB_POS);
         int chunkX = HUB_POS.getX() >> 4;
@@ -127,19 +126,17 @@ public class SleeplessDimensionEvents {
 
         StructureTemplateManager manager = level.getStructureManager();
         SleeplessMod.LOGGER.debug("Loading template {} for hub", HUB_STRUCTURE);
-        StructureTemplate template;
-        try {
-            template = manager.getOrCreate(HUB_STRUCTURE);
-        } catch (Exception e) {
-            SleeplessMod.LOGGER.error("Failed loading template {}", HUB_STRUCTURE, e);
 
+        var optionalTemplate = manager.get(HUB_STRUCTURE);
+        if (optionalTemplate.isEmpty()) {
+            SleeplessMod.LOGGER.error("Missing template {} when placing hub", HUB_STRUCTURE);
+            level.setChunkForced(chunkX, chunkZ, false);
             return;
         }
         StructureTemplate template = optionalTemplate.get();
 
-
-        SleeplessMod.LOGGER.debug("Template size {}. Placing hub at {} in {}", template.getSize(), HUB_POS,
-                level.dimension());
+        SleeplessMod.LOGGER.debug("Template size {} for {}", template.getSize(), HUB_STRUCTURE);
+        SleeplessMod.LOGGER.debug("Attempting placement at {} in {}", HUB_POS, level.dimension());
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
                 level.getRandom(), 2);
         SleeplessMod.LOGGER.debug("Hub placed at coordinates {}", HUB_POS);
@@ -156,21 +153,15 @@ public class SleeplessDimensionEvents {
     public static BlockPos adjustSpawnPos(ServerLevel level) {
         int x = Mth.floor(SPAWN_POS.x);
         int z = Mth.floor(SPAWN_POS.z);
-        int y = Mth.floor(SPAWN_POS.y);
-        BlockPos pos = new BlockPos(x, y, z);
 
-        // Walk downward until we find solid ground beneath the spawn point
-        while (y > level.getMinBuildHeight() &&
-                level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty()) {
-            y--;
-            pos = pos.below();
-        }
+        int estimatedY = Mth.floor(SPAWN_POS.y);
 
-        // If the spawn block itself is obstructed, shift upward into air
+        BlockPos start = new BlockPos(x, estimatedY, z);
+        BlockPos pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, start);
 
-        while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
-            y++;
-            pos = pos.above();
+        if (pos.getY() < level.getMinBuildHeight()) {
+            pos = new BlockPos(x, level.getMinBuildHeight(), z);
+
         }
 
         return pos;
