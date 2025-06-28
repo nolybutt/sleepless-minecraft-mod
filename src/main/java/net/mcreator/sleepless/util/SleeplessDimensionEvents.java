@@ -37,6 +37,7 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * teleport. A previous version offset on the Z axis; the corrected logic uses
  * the X axis so players appear inside the hub. Debug logs make failures
  * explicit.</p>
+
  */
 @Mod.EventBusSubscriber(modid = SleeplessMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SleeplessDimensionEvents {
@@ -54,11 +55,13 @@ public class SleeplessDimensionEvents {
 
     // Coordinates for the hub structure's placement in the Sleepless dimension
     private static final BlockPos HUB_POS;
+
     // Offset from the structure block to the player spawn point.
     // Players spawn 22 blocks south and 7 blocks above the hub. The previous
     // implementation misplaced the spawn along the Z axis; the correct offset
     // uses the X axis.
     private static final BlockPos SPAWN_OFFSET = new BlockPos(22, 7, 0);
+
 
     static {
         HUB_POS = readBlockPos("data/sleepless/structure_block_location.txt");
@@ -74,8 +77,10 @@ public class SleeplessDimensionEvents {
      * Players spawn 22 blocks south and 7 blocks above the hub.
      */
     public static Vec3 getSpawnVec() {
+
         BlockPos block = HUB_POS.offset(SPAWN_OFFSET);
         return new Vec3(block.getX() + 0.5, block.getY(), block.getZ() + 0.5);
+
     }
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
@@ -102,6 +107,7 @@ public class SleeplessDimensionEvents {
         BlockPos spawnPos = adjustSpawnPos(level);
         // Teleport the player to the spawn relative to the hub structure
         player.teleportTo(level, targetVec.x, spawnPos.getY(), targetVec.z,
+
                 player.getYRot(), player.getXRot());
         player.sendSystemMessage(Component.literal("Teleported to Sleepless hub"));
         SleeplessMod.LOGGER.info("Teleported {} to {}", player.getScoreboardName(), targetVec);
@@ -148,6 +154,7 @@ public class SleeplessDimensionEvents {
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
                 level.getRandom(), 2);
         SleeplessMod.LOGGER.debug("Hub placed at coordinates {}", HUB_POS);
+
         hubPlaced = true;
         level.setChunkForced(chunkX, chunkZ, false);
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
@@ -158,6 +165,7 @@ public class SleeplessDimensionEvents {
      * Moves upward only when the location is obstructed.
      */
     public static BlockPos adjustSpawnPos(ServerLevel level) {
+
         BlockPos start = HUB_POS.offset(SPAWN_OFFSET);
         int x = start.getX();
         int z = start.getZ();
@@ -166,6 +174,7 @@ public class SleeplessDimensionEvents {
 
         if (pos.getY() < level.getMinBuildHeight()) {
             pos = new BlockPos(x, level.getMinBuildHeight(), z);
+
         }
 
         return pos;
