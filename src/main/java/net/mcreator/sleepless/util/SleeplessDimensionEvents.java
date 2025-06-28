@@ -118,6 +118,7 @@ public class SleeplessDimensionEvents {
         if (hubPlaced)
             return;
 
+
         // Load/generate and force the chunk at the hub coordinates before placement
         level.getChunkAt(HUB_POS);
         int chunkX = HUB_POS.getX() >> 4;
@@ -131,14 +132,18 @@ public class SleeplessDimensionEvents {
             template = manager.getOrCreate(HUB_STRUCTURE);
         } catch (Exception e) {
             SleeplessMod.LOGGER.error("Failed loading template {}", HUB_STRUCTURE, e);
+
             return;
         }
+        StructureTemplate template = optionalTemplate.get();
+
 
         SleeplessMod.LOGGER.debug("Template size {}. Placing hub at {} in {}", template.getSize(), HUB_POS,
                 level.dimension());
         template.placeInWorld(level, HUB_POS, HUB_POS, new StructurePlaceSettings(),
                 level.getRandom(), 2);
         SleeplessMod.LOGGER.debug("Hub placed at coordinates {}", HUB_POS);
+
         hubPlaced = true;
         level.setChunkForced(chunkX, chunkZ, false);
         SleeplessMod.LOGGER.info("Sleepless hub placed at {}", HUB_POS);
@@ -162,6 +167,7 @@ public class SleeplessDimensionEvents {
         }
 
         // If the spawn block itself is obstructed, shift upward into air
+
         while (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty() && y < level.getMaxBuildHeight() - 1) {
             y++;
             pos = pos.above();
