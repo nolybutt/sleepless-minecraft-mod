@@ -32,8 +32,10 @@ import net.mcreator.sleepless.init.SleeplessModEntities;
  * via {@code StructureTemplateManager#get} using the ID
  * {@code sleepless:sleepless_dimension}. Failures are logged and the attempted
  * placement coordinates printed. The hub chunk is forced while placing the
- * structure. Players now spawn relative to the hub &mdash; 22 blocks south and
- * 7 blocks above the structure block &mdash; ensuring a safe location on every
+
+ * structure. Players now spawn relative to the hub &mdash; 22 blocks south,
+ * 17 blocks along the Z axis and 7 blocks above the structure block &mdash;
+ * ensuring a safe location on every
  * teleport. A previous version offset on the Z axis; the corrected logic uses
  * the X axis so players appear inside the hub. Debug logs make failures
  * explicit.</p>
@@ -57,10 +59,10 @@ public class SleeplessDimensionEvents {
     private static final BlockPos HUB_POS;
 
     // Offset from the structure block to the player spawn point.
-    // Players spawn 22 blocks south and 7 blocks above the hub. The previous
-    // implementation misplaced the spawn along the Z axis; the correct offset
-    // uses the X axis.
-    private static final BlockPos SPAWN_OFFSET = new BlockPos(22, 7, 0);
+    // Players spawn 22 blocks south, 17 blocks forward on the Z axis and 7 blocks
+    // above the hub. The previous implementation misplaced the spawn along the Z
+    // axis; the correct offset uses the X axis plus this additional Z offset.
+    private static final BlockPos SPAWN_OFFSET = new BlockPos(22, 7, 17);
 
 
     static {
@@ -74,10 +76,11 @@ public class SleeplessDimensionEvents {
 
     /**
      * Calculates the absolute spawn vector relative to the hub structure block.
-     * Players spawn 22 blocks south and 7 blocks above the hub.
+
+     * Players spawn 22 blocks south, 17 blocks on the Z axis and 7 blocks above
+     * the hub.
      */
     public static Vec3 getSpawnVec() {
-
         BlockPos block = HUB_POS.offset(SPAWN_OFFSET);
         return new Vec3(block.getX() + 0.5, block.getY(), block.getZ() + 0.5);
 
