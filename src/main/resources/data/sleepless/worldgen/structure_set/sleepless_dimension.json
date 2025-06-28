@@ -1,0 +1,14 @@
+{
+    "structures": [
+        {
+            "structure": "sleepless:sleepless_dimension",
+            "weight": 1
+        }
+    ],
+    "placement": {
+        "type": "minecraft:random_spread",
+        "salt": 123456,
+        "spacing": 10,
+        "separation": 5
+    }
+}
